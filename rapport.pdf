@@ -1,0 +1,438 @@
+# LearnHub - MERN Project Rapport
+
+## Table of Contents
+1. Project Overview
+2. Technical Architecture
+3. Database Design
+4. Authentication System
+5. API Endpoints
+6. Frontend Components
+7. Code Structure
+8. Security Features
+9. Relationship Diagrams
+10. Testing Checklist
+
+---
+
+## 1. Project Overview
+
+**Project Name**: LearnHub  
+**Type**: Online Learning Platform  
+**Tech Stack**: MERN (MongoDB, Express, React, Node.js)  
+**Purpose**: Educational platform demonstration for university exam  
+
+### Objectives
+- Implement secure user authentication with JWT
+- Design database relationships (1-to-1, 1-to-many, many-to-many)
+- Create RESTful API with proper middleware
+- Build React frontend with routing and state management
+- Demonstrate role-based access control
+
+---
+
+## 2. Technical Architecture
+
+### Backend Architecture (MVC Pattern)
+
+```
+Express Server
+├── Routes (Endpoints)
+├── Controllers (Business Logic)
+├── Models (MongoDB Schemas)
+├── Middleware (Authentication, Validation)
+└── Config (Database, JWT, Password)
+```
+
+### Frontend Architecture (Component-Based)
+
+```
+React App
+├── Pages (Full page views)
+├── Components (Reusable UI elements)
+├── Services (API communication)
+└── Routing (Navigation)
+```
+
+---
+
+## 3. Database Design
+
+### Collections
+
+1. **users** - Authentication & user profiles
+2. **profiles** - Extended user information
+3. **courses** - Course content
+4. **lessons** - Course lessons
+5. **enrollments** - Student-Course relationships
+
+### Schema Relationships
+
+- **User → Profile**: 1-to-1 (One profile per user)
+- **User → Course**: 1-to-Many (Instructor creates multiple courses)
+- **Course → Lesson**: 1-to-Many (Course has multiple lessons)
+- **User ↔ Course**: Many-to-Many via Enrollment
+
+---
+
+## 4. Authentication System
+
+### Registration Flow
+```
+1. User submits registration form
+2. Backend validates input (Joi)
+3. Email uniqueness checked
+4. Password hashed with bcryptjs
+5. User created in database
+6. Profile created automatically
+7. JWT token generated
+8. Token returned to frontend
+9. Token stored in localStorage
+```
+
+### Login Flow
+```
+1. User submits login credentials
+2. User found by email
+3. Password compared (bcryptjs.compare)
+4. If valid: JWT token generated
+5. Token sent to frontend
+6. Token stored in localStorage
+7. User data stored in localStorage
+```
+
+### Protected Routes
+```
+Backend: verifyJWT middleware checks Authorization header
+Frontend: ProtectedRoute component checks localStorage token
+If no token: Redirect to /login
+If expired: Automatic logout and redirect
+```
+
+---
+
+## 5. API Endpoints
+
+### Auth Endpoints
+```
+POST /api/auth/register
+- Input: name, email, password, role
+- Output: token, user
+- Authorization: Public
+
+POST /api/auth/login
+- Input: email, password
+- Output: token, user
+- Authorization: Public
+
+GET /api/auth/me
+- Output: user, profile
+- Authorization: Required (JWT)
+```
+
+### Course Endpoints
+```
+GET /api/courses
+- Output: All courses with instructor info
+- Authorization: Public
+
+GET /api/courses/:id
+- Output: Course with lessons
+- Authorization: Public
+
+POST /api/courses
+- Input: title, description
+- Output: Created course
+- Authorization: Instructor only
+
+PUT /api/courses/:id
+- Input: title, description
+- Output: Updated course
+- Authorization: Instructor only
+
+DELETE /api/courses/:id
+- Output: Success message
+- Authorization: Instructor only
+```
+
+### Lesson Endpoints
+```
+GET /api/lessons/course/:courseId
+- Output: Lessons for course
+- Authorization: Public
+
+POST /api/lessons/:courseId
+- Input: title, content, order
+- Output: Created lesson
+- Authorization: Instructor only
+
+PUT /api/lessons/:id
+- Input: title, content, order
+- Output: Updated lesson
+- Authorization: Instructor only
+
+DELETE /api/lessons/:id
+- Output: Success message
+- Authorization: Instructor only
+```
+
+### Enrollment Endpoints
+```
+POST /api/enrollments
+- Input: courseId
+- Output: Enrollment record
+- Authorization: Student only
+
+GET /api/enrollments/user/:userId
+- Output: User's enrollments
+- Authorization: Authenticated users
+
+DELETE /api/enrollments/:enrollmentId
+- Output: Success message
+- Authorization: Enrollment owner only
+```
+
+---
+
+## 6. Frontend Components
+
+### Pages (7 main pages)
+
+1. **HomePage** - Welcome, feature overview
+2. **LoginPage** - User login form
+3. **RegisterPage** - User registration form
+4. **CoursesPage** - Browse all courses
+5. **CourseDetailsPage** - View course + lessons + enroll
+6. **StudentDashboard** - View enrolled courses
+7. **InstructorDashboard** - Create/manage courses
+
+### Components (2 reusable)
+
+1. **Navbar** - Navigation, user info, logout
+2. **ProtectedRoute** - Route authentication wrapper
+
+### Services (3 API service files)
+
+1. **api.js** - Axios instance with interceptors
+2. **authService.js** - Auth API calls
+3. **courseService.js** - Course API calls
+4. **enrollmentService.js** - Enrollment API calls
+
+---
+
+## 7. Code Structure
+
+### Backend Folder Structure
+```
+Backend/
+├── config/
+│   ├── database.js (MongoDB connection)
+│   ├── jwt.js (Token generation/verification)
+│   ├── password.js (Hashing/comparison)
+│   └── validation.js (Joi schemas)
+├── models/
+│   ├── User.js (User schema)
+│   ├── Profile.js (Profile schema)
+│   ├── Course.js (Course schema)
+│   ├── Lesson.js (Lesson schema)
+│   └── Enrollment.js (Enrollment schema)
+├── controllers/
+│   ├── authController.js (Register, Login, GetMe)
+│   ├── courseController.js (CRUD courses)
+│   ├── lessonController.js (CRUD lessons)
+│   └── enrollmentController.js (Enroll, Unenroll)
+├── routes/
+│   ├── authRoutes.js (Auth endpoints)
+│   ├── courseRoutes.js (Course endpoints)
+│   ├── lessonRoutes.js (Lesson endpoints)
+│   └── enrollmentRoutes.js (Enrollment endpoints)
+├── middleware/
+│   └── auth.js (JWT verification, role checking)
+└── server.js (Express app, middleware setup)
+```
+
+### Frontend Folder Structure
+```
+Frontend/
+├── src/
+│   ├── pages/ (7 page components)
+│   ├── components/ (Navbar, ProtectedRoute)
+│   ├── services/ (API functions)
+│   ├── App.jsx (Main component, routing)
+│   ├── main.jsx (Entry point)
+│   └── index.css (Global styles)
+├── public/ (Static assets)
+├── index.html (HTML entry)
+├── vite.config.js (Build config)
+└── tailwind.config.js (CSS framework config)
+```
+
+---
+
+## 8. Security Features
+
+### Authentication
+- ✅ JWT tokens (7-day expiry)
+- ✅ Secure token storage (localStorage)
+- ✅ Token verification on every protected request
+
+### Password Security
+- ✅ Hashing with bcryptjs (10 salt rounds)
+- ✅ Never stored in plain text
+- ✅ Password not returned in API responses
+
+### Authorization
+- ✅ Role-based access control (student/instructor)
+- ✅ Middleware checks on protected routes
+- ✅ Resource ownership verification
+
+### Input Validation
+- ✅ Server-side validation with Joi
+- ✅ Email format validation
+- ✅ Password length validation
+- ✅ Required field checks
+
+### API Security
+- ✅ CORS enabled (restricted to frontend domain)
+- ✅ No sensitive data in URLs
+- ✅ Proper HTTP status codes
+- ✅ Error messages don't leak info
+
+---
+
+## 9. Relationship Diagrams
+
+### ER Diagram
+```
+┌─────────────┐         ┌─────────────┐
+│    User     │─────────│   Profile   │
+│ (1)     (1) │         │             │
+├─────────────┤         ├─────────────┤
+│ id (PK)     │         │ id (PK)     │
+│ name        │         │ userId (FK) │
+│ email       │         │ bio         │
+│ password    │         │ avatar      │
+│ role        │         │ skills      │
+└─────────────┘         └─────────────┘
+      │
+      │ (1)        (Many)
+      │
+      ├─────────────────────┐
+      │                     │
+      └──────────────────┐  │
+         creates          │  │
+                       ┌──┴──────────┐
+                       │   Course    │
+                       ├─────────────┤
+                       │ id (PK)     │
+                       │ title       │
+                       │ description │
+                       │ instructorId│ (FK → User)
+                       └──────┬──────┘
+                              │
+                        (1)   │   (Many)
+                              │
+                          ┌───┴────────┐
+                          │   Lesson   │
+                          ├────────────┤
+                          │ id (PK)    │
+                          │ title      │
+                          │ content    │
+                          │ courseId   │ (FK)
+                          │ order      │
+                          └────────────┘
+
+┌─────────────────────────────────────────┐
+│        Enrollment (Junction)            │
+├─────────────────────────────────────────┤
+│ userId (FK) + courseId (FK) = Unique   │
+│ Links: User (Many) ↔ Course (Many)     │
+└─────────────────────────────────────────┘
+```
+
+### Authentication Flow
+```
+User Submits Credentials
+         ↓
+Validate Input (Joi)
+         ↓
+Find User by Email
+         ↓
+Compare Passwords (bcryptjs)
+         ↓
+Generate JWT Token
+         ↓
+Return Token + User Info
+         ↓
+Frontend stores in localStorage
+         ↓
+Every API request includes token in header
+         ↓
+Backend verifies token (middleware)
+         ↓
+Proceed or Reject
+```
+
+---
+
+## 10. Testing Checklist
+
+### Account Creation
+- [ ] Register as student
+- [ ] Register as instructor
+- [ ] Verify unique email validation
+- [ ] Verify password minimum length (6)
+
+### Authentication
+- [ ] Login with correct credentials
+- [ ] Reject login with wrong password
+- [ ] Reject login with non-existent email
+- [ ] Token stored in localStorage after login
+- [ ] Logout clears token and user data
+
+### Course Management (Instructor)
+- [ ] Create new course
+- [ ] See created course in course list
+- [ ] Update course title/description
+- [ ] Delete course (removes lessons too)
+- [ ] Non-instructors cannot create courses
+
+### Course Browsing (Public)
+- [ ] View all courses on /courses
+- [ ] Click course to see details
+- [ ] View lessons in course
+- [ ] Non-logged users see all courses
+
+### Enrollment (Student)
+- [ ] Enroll in course
+- [ ] See enrolled course in dashboard
+- [ ] Cannot enroll twice in same course
+- [ ] Unenroll from course
+- [ ] Enrolled course removed from dashboard
+
+### Protected Routes
+- [ ] Cannot access /student-dashboard without login
+- [ ] Cannot access /instructor-dashboard without login
+- [ ] After logout, cannot access protected routes
+- [ ] Redirected to /login when accessing protected route
+
+### Error Handling
+- [ ] Proper error messages on validation failure
+- [ ] Proper error messages on server errors
+- [ ] No 500 errors for validation issues (400 instead)
+- [ ] Expired token causes logout
+
+---
+
+## Conclusion
+
+LearnHub demonstrates a complete MERN implementation with:
+- ✅ Secure authentication (JWT + bcryptjs)
+- ✅ Proper database relationships
+- ✅ Role-based access control
+- ✅ RESTful API design
+- ✅ Modern React frontend
+- ✅ Input validation
+- ✅ Error handling
+- ✅ Clean, commented code
+
+Suitable for university MERN examination and practical projects.
