@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # 📚 LearnHub - MERN Online Learning Platform
 
 A complete beginner-friendly MERN (MongoDB, Express, React, Node.js) application for an online learning platform. Built as an academic project suitable for university MERN examinations.
@@ -390,29 +391,3 @@ This project demonstrates:
 - Input validation with Joi
 - Password security with bcryptjs
 - Middleware in Express
-
-## 📄 Additional Notes
-
-- **No external APIs**: All functionality self-contained
-- **No database seeds**: Create sample data manually through UI
-- **No animations**: Focus on functionality
-- **No payment processing**: Educational project only
-- **Production ready**: Code structure follows industry best practices
-
-## 👨‍💼 For Exam Explanation
-
-When explaining this project:
-1. **Start with structure**: Show folder layout and separation of concerns
-2. **Explain relationships**: Draw database relationship diagrams
-3. **Walk through flow**: Registration → Login → Browse → Enroll → Dashboard
-4. **Highlight security**: Password hashing, JWT tokens, role-based access
-5. **Show code quality**: MVC structure, comments, error handling
-
-## 📞 Support
-
-For issues or questions about the project structure, refer to code comments or review the model files for data structure understanding.
-
----
-
-**Happy Learning! 🚀**
-Built with ❤️ for MERN students
